@@ -8,4 +8,4 @@ Maxy :
 Ćwiczenie|  Mati | Endriu
 ----------|------| --------
 klata | 90 | 95
-podciaganie | 40 | 55
+podciaganie | 40 | 50
