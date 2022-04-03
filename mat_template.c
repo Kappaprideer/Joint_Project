@@ -100,14 +100,17 @@ double gauss_simplified(double A[][SIZE], int n)
 // swapping the rows use index vector - do not copy entire rows.)
 // If max A[i][i] < eps, function returns 0.
 // If det != 0 && b != NULL && x != NULL then vector x should contain solution of Ax = b.
-int swap(int* a, int* b){
+void swap(int* a, int* b){
 	int tmp = *a;
 	*a = *b;
 	*b = tmp;
 }
 
 double gauss(double A[][SIZE], const double b[], double x[], const int n, const double eps)
-{
+{	
+	double b_copy[n];
+	for(int i=0; i<n; i++)
+		b_copy[i] = b[i];
 	int indeksy[n];
 	double det=1;
     for(int i=0; i<n; i++) indeksy[i]=i;
@@ -132,18 +135,13 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
 			{
 				A[indeksy[j]][x]-=(A[indeksy[i]][x]/element)*razy;
 			}
+			b_copy[j] -= (b_copy[i]/element)*razy;
 		}
 	
 	}
-
+	b = b_copy;
     for(int i=0; i<n; i++)	det*=A[indeksy[i]][i];
 	for(int i=0; i<n; i++) if(b[i]==0) return 0;
-
-	
-
-    
-
-
 
  return det;
 }
