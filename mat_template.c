@@ -42,16 +42,19 @@ void mat_product(double A[][SIZE], double B[][SIZE], double AB[][SIZE], int m, i
 {
 	// m- liczba wierzy A p- liczba komlumn A, p- liczba wierszy B, n- liczba kolumn B
 	//A[m][p] B[p][n]
-	for(int i=0; i<m*n; i++)
-	{
-		double tmp=0;
-		for(int j=0; j<p; j++)
-		{
-			tmp+=A[i/m][j]*B[j][i%n];
-		}
-		AB[i/m][i%n]=tmp;
-	}
+	double tmp=0;
+	for(int i=0; i<m; i++){
 
+        for(int j=0; j<n; j++){
+			tmp=0;
+            for(int k=0; k<p; k++)
+			{
+                tmp += A[i][k] * B[k][j];
+			}
+			AB[i][j]=tmp;
+
+		}
+	}
 }
 
 // Calculate matrix - vector product
@@ -109,8 +112,7 @@ void swap(int* a, int* b){
 double gauss(double A[][SIZE], const double b[], double x[], const int n, const double eps)
 {	
 	double b_copy[n];
-	for(int i=0; i<n; i++)
-		b_copy[i] = b[i];
+	for(int i=0; i<n; i++) b_copy[i] = b[i];
 	int indeksy[n];
 	double det=1;
     for(int i=0; i<n; i++) indeksy[i]=i;
@@ -135,13 +137,23 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
 			{
 				A[indeksy[j]][x]-=(A[indeksy[i]][x]/element)*razy;
 			}
-			b_copy[j] -= (b_copy[i]/element)*razy;
+			b_copy[indeksy[j]] -= (b_copy[indeksy[i]]/element)*razy;
 		}
 	
 	}
-	b = b_copy;
     for(int i=0; i<n; i++)	det*=A[indeksy[i]][i];
 	for(int i=0; i<n; i++) if(b[i]==0) return 0;
+
+
+	for(int i=n-1; i>=0; i--){
+		double s=0;
+		for(int j=n-1; j>i; j--)
+		{
+			s+=A[indeksy[i]][j]*x[j];
+		}
+		
+		x[i]=(b_copy[indeksy[i]]-s)/A[indeksy[i]][i];
+	}
 
  return det;
 }
@@ -152,12 +164,67 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
 // If max A[i][i] < eps, function returns 0.
 double matrix_inv(double A[][SIZE], double B[][SIZE], int n, double eps)
 {
+double det=1;
+int indeksy[n];
+for(int i=0; i<n*n; i++) B[i/n][i%n]=0;
+for(int i=0; i<n; i++) B[i][i]=1;
+for(int i=0; i<n; i++) indeksy[i]=i;
+
+for(int i=0; i<n; i++)
+{   
+	for(int j=i+1; j<n; j++)
+	{
+		if(fabs(A[indeksy[i]][i])<fabs(A[indeksy[j]][i]))
+		{
+			det*=-1;
+			swap(&indeksy[i],&indeksy[j]);
+		}
+	}
+	double element=A[indeksy[i]][i];
+	for(int j=i+1; j<n; j++)
+	{	
+		if(fabs(element)<eps) return 0;
+		double razy=A[indeksy[j]][i];
+		for(int x=0; x<n; x++)
+		{
+			A[indeksy[j]][x]-=(A[indeksy[i]][x]/element)*razy;
+			B[indeksy[j]][x]-=(B[indeksy[i]][x]/element)*razy;
+		}
+	}
+for(int i=n-1; i>=0; i--)	
+{   
+	double element=A[indeksy[i]][i];
+	for(int j=i-1; j>=0; j--)
+	{	
+		double razy=A[indeksy[j]][i];
+		for(int x=0; x<n; x++)
+		{
+			A[indeksy[j]][x]-=(A[indeksy[i]][x]/element)*razy;
+			B[indeksy[j]][x]-=(B[indeksy[i]][x]/element)*razy;
+		}
+	}
+}
 
 
+}
+
+for(int i=0; i<n; i++){
+	for(int j=0; j<n; j++)
+	B[indeksy[i]][j]/=A[indeksy[i]][i];
+}
+double C[n][n];
+for(int i=0; i<n; i++)
+	for(int j=0; j<n; j++)
+		C[i][j]=B[indeksy[i]][j];
+
+for(int i=0; i<n; i++)
+	for(int j=0; j<n; j++)
+		B[i][j]=C[i][j];
 
 
+for(int i=0; i<n; i++)	det*=A[indeksy[i]][i];
+return det;
 
-return 0;	
 }
 
 int main(void) {
